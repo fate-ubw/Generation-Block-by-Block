@@ -1,4 +1,4 @@
-# Generation chunk by chunk
+# Generation chunk by chunk & semi autoregressive language model
 
 # idea
 
@@ -6,20 +6,24 @@ A novel semi-autoregressive language model. The idea of generation chunk by chun
 
 # Experiments
 
-1. Autoregressive model training on wikitext-103 with parsing features
+1. Autoregressive model (decoder only Transformer) training on wikitext-103 with parsing features
     - Verify  parsing features can improve text generation quality
-2. Semi-autoregressive model training on wikitext-103 with parsing features
+2. Semi-autoregressive model (decoder only Transformer) training on wikitext-103 with parsing features
     - Verify if parsing features can be used for generation chunk by chunk
 
-# reslut
+# result & conclusion
 
-- parsing features text generation quality in mauve scores
+- parsing features improve text generation quality in mauve scores from **0.93 → 0.94 (nuelcus)**
 - generation chunk by chunk maybe not work using parsing features to segment text
 
-
-
-# pretrain model & processed data
-- You can directly download my trained model and processed data 
+| model | dataset | decoder strategy | MAUVE | checkpoint_step | topp | acc | ppl |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| vanilla Transformer (Decoder Only) | wikitext103 | greedy | 0.29997179936793095 | 33609 | 0 | 0.39287125003563 | 25.7757158475847 |
+| vanilla Transformer (Decoder Only) | wikitext103 | nuelcus | 0.9342974452364826 | 33609 | 0.9 | 0.39287125003563 | 25.7757158475847 |
+| vanilla Transformer (Decoder Only) | wikitext103 (parsing features ) | greedy | 0.23278401293948345 | 46207 | 0 | 0.3314446349618745 | 65.99023619926712 |
+| vanilla Transformer (Decoder Only) | wikitext103 (parsing features ) | nuelcus | 0.9402372689796121 | 46207 | 0.9 | 0.3314446349618745 | 65.99023619926712 |
+| sar model | wikitext103 (parsing features ) | greedy | 0.017628779550712223 | 96608 | 0 | - | - |
+| sar model | wikitext103 (parsing features ) | nuelcus | 0.1766081592388548 | 96608 | 0.9 | - | - |
 
 # Quick start experiment 2
 
@@ -168,6 +172,7 @@ sh ./run/MLE_sar_chunk_chunkposition.sh
 - MLE_sar_chunk_chunkposition.sh
     
     ```python
+    
     SAVE_DIR=/ceph-jd/pub/jupyter/yangly/notebooks/DITTO-main/checkpoints/model_sar_chunk
     mkdir -p $SAVE_DIR
     export HOME=/ceph-jd/pub/jupyter/yangly/notebooks/DITTO-main/
@@ -181,19 +186,22 @@ sh ./run/MLE_sar_chunk_chunkposition.sh
     unset MASTER_ADDR
     
     python -u -W ignore /ceph-jd/pub/jupyter/yangly/notebooks/DITTO-main/train.py \\
-        --task language_modeling_with_generation_sar_chunk /ceph-jd/pub/jupyter/yangly/notebooks/DITTO-main/datas/data-bin/chunked_wikitext-103 \\
-        --user-dir /ceph-jd/pub/jupyter/yangly/notebooks/DITTO-main/fairseq/custom --arch transformer_sar_lm_ul --max-tokens 1536 --tokens-per-sample 1536 \\
-        --fp16 --max-update 286000 --max-lr 1.0 --t-mult 2 --lr-period-updates 270000\\
-        --lr-scheduler cosine --lr-shrink 0.75 --warmup-updates 16000 --warmup-init-lr 1e-07 --min-lr 1e-09 \\
-        --no-epoch-checkpoints \\
-        --optimizer nag --lr 0.0001 --clip-norm 0.1 --update-freq 3 --seed 1 --sample-break-mode none \\
-        --skip-invalid-size-inputs-valid-test --ddp-backend no_c10d --save-interval-updates 10000 \\
-        --keep-interval-updates 2 --no-progress-bar --log-interval 100 \\
-        --criterion cross_entropy_wcustom_metrics \\
-        --save-dir $SAVE_DIR \\
-        --tensorboard-logdir $SAVE_DIR 2>&1 | tee -a $SAVE_DIR/log.txt
-    rm -rf /ceph-jd/pub/jupyter/yangly/notebooks/DITTO-main/fairseq/models/.ipynb_checkpoints 
+    --task language_modeling_with_generation_sar_chunk /ceph-jd/pub/jupyter/yangly/notebooks/DITTO-main/datas/data-bin/chunked_wikitext-103 \\
+    --user-dir /ceph-jd/pub/jupyter/yangly/notebooks/DITTO-main/fairseq/custom --arch transformer_sar_lm_ul --max-tokens 1536 --tokens-per-sample 1536 \\
+    --fp16 --max-update 286000 --max-lr 1.0 --t-mult 2 --lr-period-updates 270000 \\
+    --lr-scheduler cosine --lr-shrink 0.75 --warmup-updates 16000 --warmup-init-lr 1e-07 --min-lr 1e-09 \\
+    --no-epoch-checkpoints \\
+    --optimizer nag --lr 0.0001 --clip-norm 0.1 --update-freq 3 --seed 1 --sample-break-mode none \\
+    --skip-invalid-size-inputs-valid-test --ddp-backend no_c10d --save-interval-updates 10000 \\
+    --keep-interval-updates 2 --no-progress-bar --log-interval 100 \\
+    --criterion cross_entropy_wcustom_metrics \\
+    --save-dir $SAVE_DIR \\
+    --tensorboard-logdir $SAVE_DIR 2>&1 | tee -a $SAVE_DIR/log.txt
+    
+    rm -rf /ceph-jd/pub/jupyter/yangly/notebooks/DITTO-main/fairseq/models/.ipynb_checkpoints
+    
     ```
+    
 
 ### fairseq/models
 
@@ -212,11 +220,11 @@ sh ./run/MLE_sar_chunk_chunkposition.sh
 ### fairseq/moduels
 
 - interchunk_learned_positional_embedding.py
-    - Main function: This class mainly defines the learned positional embeddings between chunks
-    - Define the InterchunkLearnedPositionalEmbedding class, which inherits from nn.Embedding. This class will be instantiated in transformer_sar.py
+- Main function: This class mainly defines the learned positional embeddings between chunks
+- Define the InterchunkLearnedPositionalEmbedding class, which inherits from nn.Embedding. This class will be instantiated in transformer_sar.py
 - insidechunk_learned_positional_embedding.py
-    - Main function: Defines the positional embeddings within a chunk
-    - Define the InsidechunkLearnedPositionalEmbedding class, which also inherits from nn.Embedding. This class will also be instantiated in transformer_sar.py
+- Main function: Defines the positional embeddings within a chunk
+- Define the InsidechunkLearnedPositionalEmbedding class, which also inherits from nn.Embedding. This class will also be instantiated in transformer_sar.py
 
 ### fairseq/data
 
