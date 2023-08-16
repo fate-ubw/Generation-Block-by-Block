@@ -1,3 +1,5 @@
+# Generation chunk by chunk
+
 # idea
 
 A novel semi-autoregressive language model. The idea of generation chunk by chunk is inspired by the way of human speaking. Humans do not speak in complete sentences all in one times when using language. Instead, we express relatively complete chunks of meaning one at a time, with pauses in between each chunk. Mainstream language models like GPT generate one token at a time.However, Non-autoregressive and semi-autoregressive model achieve good performance in machine translation. semi-autoregressive model express potential in generation chunk by chunk. Here is my model and experiments results. 
@@ -15,6 +17,9 @@ A novel semi-autoregressive language model. The idea of generation chunk by chun
 - generation chunk by chunk maybe not work using parsing features to segment text
 
 
+
+# pretrain model & processed data
+- You can directly download my trained model and processed data 
 
 # Quick start experiment 2
 
