@@ -218,7 +218,7 @@ sh ./run/MLE_sar_chunk_chunkposition.sh
 - transformer_sar.py
     - main function：define sar decoder model
     - Define the `TransformerSarDecoder` class, which inherits from the `TransformerDecoder` class (in [transformer.py](http://transformer.py/)). The `TransformerSarDecoder` class will be instantiated in the transformer_lm_sar.py file, and implements the main architecture for the SAR model.
-    - Override the **`init**()` method, and initialize two types of positional embeddings
+    - Override the `init()` method, and initialize two types of positional embeddings
     - Override the `extract_features()` method, rewrite the forward part of the model, replacing the mask matrix and position encoding for the AR model
 - transformer_lm_sar.py
     - Main function: This file integrates the base classes and defines the SAR language model
