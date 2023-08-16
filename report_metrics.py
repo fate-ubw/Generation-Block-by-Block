@@ -129,7 +129,6 @@ def get_metric(filename, filetype, script_args):
         for i, line in enumerate(completion_lines):
             splitted_line = line.split()
             assert len(splitted_line) == (prefix_length + completion_length)
-            # 其实是需要的，如果说全部的代码是正确的，那么它一定是对的
             actual_completions.append(splitted_line[prefix_length:])
             flat_completions.extend(splitted_line[prefix_length:])
 

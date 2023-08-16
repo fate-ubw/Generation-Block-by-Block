@@ -1,7 +1,13 @@
-# Generation chunk by chunk
+# idea
+
 A novel semi-autoregressive language model. The idea of generation chunk by chunk is inspired by the way of human speaking. Humans do not speak in complete sentences all in one times when using language. Instead, we express relatively complete chunks of meaning one at a time, with pauses in between each chunk. Mainstream language models like GPT generate one token at a time.However, Non-autoregressive and semi-autoregressive model achieve good performance in machine translation. semi-autoregressive model express potential in generation chunk by chunk. Here is my model and experiments results. 
 
-# quick start
+# Experiments
+
+1. Autoregressive model train wikitext-103 with parsing features
+2. semi-autoregressive model train wikitext-103 with parsing features（Generation chunk by chunk）
+
+# Quick start experiment 2
 
 - enviroment
 
@@ -36,7 +42,7 @@ tar xzvf wikitext-103_v0.tar.gz
 cd ..
 ```
 
-## raw data preprocessing
+## Adding parsing feature to raw data
 
 - split raw data in to chunk by adding parsing feature
     - raw data（from wikitext103）
@@ -54,7 +60,7 @@ cd ..
         ```
         
 
-### code
+### implementation
 
 - change PATH = '/mnt/nfs-storage/scp/wikitext-103’ into your wikitext103 file path
 - output path is the same as PATH of wikitext103
@@ -108,12 +114,22 @@ sh ./run/MLE_sar_chunk_chunkposition.sh
 
 ## evaluation
 
+- mainly evaluate MUAUVE score
+- calculate MAUVE need gpt2-large model. You can download automatically. Using local model need download from huggingface. Remember change the path of MAUVE calculating function
+    
+    ```python
+    #report_metrics.py(line:115)
+    out = mauve.compute_mauve(p_text=p_texts, q_text=q_texts, max_text_length=prefix_length + completion_length,
+                                         verbose=False, featurize_model_name='PATH/gpt2-large',)
+    ```
+    
 - run
-
-```python
-sh ./runs/3-Generate_and_eval_greedy_sar.sh
-sh ./runs/3-Generate_and_eval_nuelcus_sar.sh
-```
+    
+    ```python
+    sh ./runs/3-Generate_and_eval_greedy_sar.sh
+    sh ./runs/3-Generate_and_eval_nuelcus_sar.sh
+    ```
+    
 
 # A**rchitecture**
 
@@ -127,18 +143,120 @@ sh ./runs/3-Generate_and_eval_nuelcus_sar.sh
 - mask matrix for attention:
     - non-causal matrix（staircase mask matrix）
     - train stage & inference stage
-
-```python
-fairseq/model/transformer_sar.py
-fairseq/model/transformer_lm_sar.py
-```
-
 - position embedding:
     - InterChunk position id: the position information of each chunk
     - InsideChunk position id: position information of each token in one chunk
 
+# code documents
+
+### train sh file
+
+- MLE_sar_chunk_chunkposition.sh
+
 ```python
-#
-fairseq/moduels/interchunk_learned_positional_embedding.py
-fairseq/moduels/insidechunk_learned_positional_embedding.py
+
+SAVE_DIR=/ceph-jd/pub/jupyter/yangly/notebooks/DITTO-main/checkpoints/model_sar_chunk
+
+mkdir -p $SAVE_DIR
+
+export HOME=/ceph-jd/pub/jupyter/yangly/notebooks/DITTO-main/
+
+export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
+
+export WORLD_SIZE=8
+
+export PYTHONWARNINGS='ignore:semaphore_tracker:UserWarning'
+
+export device='cuda'
+
+#unset WORLD_SIZE
+
+unset MASTER_PORT
+
+unset RANK
+
+unset MASTER_ADDR
+
+python -u -W ignore /ceph-jd/pub/jupyter/yangly/notebooks/DITTO-main/train.py \\
+
+--task language_modeling_with_generation_sar_chunk /ceph-jd/pub/jupyter/yangly/notebooks/DITTO-main/datas/data-bin/chunked_wikitext-103 \\
+
+--user-dir /ceph-jd/pub/jupyter/yangly/notebooks/DITTO-main/fairseq/custom --arch transformer_sar_lm_ul --max-tokens 1536 --tokens-per-sample 1536 \\
+
+--fp16 --max-update 286000 --max-lr 1.0 --t-mult 2 --lr-period-updates 270000 \\
+
+--lr-scheduler cosine --lr-shrink 0.75 --warmup-updates 16000 --warmup-init-lr 1e-07 --min-lr 1e-09 \\
+
+--no-epoch-checkpoints \\
+
+--optimizer nag --lr 0.0001 --clip-norm 0.1 --update-freq 3 --seed 1 --sample-break-mode none \\
+
+--skip-invalid-size-inputs-valid-test --ddp-backend no_c10d --save-interval-updates 10000 \\
+
+--keep-interval-updates 2 --no-progress-bar --log-interval 100 \\
+
+--criterion cross_entropy_wcustom_metrics \\
+
+--save-dir $SAVE_DIR \\
+
+--tensorboard-logdir $SAVE_DIR 2>&1 | tee -a $SAVE_DIR/log.txt
+
+rm -rf /ceph-jd/pub/jupyter/yangly/notebooks/DITTO-main/fairseq/models/.ipynb_checkpoints
+
 ```
+
+### fairseq/models
+
+- transformer_sar.py
+    - main function：define sar decoder model
+    - Define the `TransformerSarDecoder` class, which inherits from the `TransformerDecoder` class (in [transformer.py](http://transformer.py/)). The `TransformerSarDecoder` class will be instantiated in the transformer_lm_sar.py file, and implements the main architecture for the SAR model.
+    - Override the **init**() method, and initialize two types of positional embeddings
+    - Override the extract_features() method, rewrite the forward part of the model, replacing the mask matrix and position encoding for the AR model
+- transformer_lm_sar.py
+    - Main function: This file integrates the base classes and defines the SAR language model
+    - Define the TransformerSarLanguageModel class, which inherits from the TransformerLanguageModel class in transformer_lm.py
+    - Override the build_model() method, and define the TransformerSarDecoder in build_model()
+    - Register the transformer_sar_lm model
+    - Register the transformer_sar_lm_big model
+
+### fairseq/moduels
+
+- interchunk_learned_positional_embedding.py
+- Main function: This class mainly defines the learned positional embeddings between chunks
+- Define the InterchunkLearnedPositionalEmbedding class, which inherits from nn.Embedding. This class will be instantiated in transformer_sar.py
+- insidechunk_learned_positional_embedding.py
+- Main function: Defines the positional embeddings within a chunk
+- Define the InsidechunkLearnedPositionalEmbedding class, which also inherits from nn.Embedding. This class will also be instantiated in transformer_sar.py
+
+### fairseq/data
+
+- add_chunkstamp_dataset.py
+    - Main function: The dataloader function written for training the AR model on the chunked wikitext dataset. The chunked wikitext-103 data processed by spacy only has <chunk_s> and <chunk_e> tags added to data belonging to chunks, non-chunk data does not have <chunk_s> and <chunk_e> tags. However, during training, the model also adds <chunk_s> and <chunk_e> tags to non-chunks, treating them as chunks as well.
+    - Define the AddChunkStampDataset class inheriting from MonolingualDataset. The AddChunkStampDataset class will be instantiated in language_modeling_with_generation_ar_chunk.py.
+- chunked_dataset.py
+    - Main function: The dataloader function written for training the SAR model on the chunked wikitext dataset. The chunked wikitext-103 data processed by spacy only has <chunk_s> and <chunk_e> tags added to data belonging to chunks, non-chunk data does not have <chunk_s> and <chunk_e> tags. However, during training, the SAR model also adds <chunk_s> and <chunk_e> tags to non-chunks, treating them as chunks as well.
+    - And this dataloader implements the functionality to truncate overly long chunks.
+    - Define the ChunkedDataset class, inheriting from MonolingualDataset. ChunkedDataset will be instantiated in language_modeling_with_generation_sar_chunk.py.
+
+### fairseq/customs
+
+- evaluation_chunked_data.py
+    - Implements specialized evaluation for data with parsing features (<chunk_s> <chunk_e>). The current version removes all <chunk_s> <chunk_e> tags after generate_completions() generates tokens, so the generated data has no chunk features for normal Mauve scoring.
+- evaluate_utils_chunk_sar.py
+    - Define the generate_completions_sar function
+    - Make prefix and aligned target data
+    - Feed data into the sequence generator
+- evaluate_utils_chunk_ar.py
+    - the same as evaluate_utils_chunk_sar.py
+- sequence_generator_sar.py
+    - Problem: This function involves the main part of model inference. Since the number of valid tokens generated each time is unknown, the number of model inference steps is not fixed if we want to generate text of a specific length.
+    - Solution: To solve the above problem, we can only use an accumulative approach - accumulate the number of valid tokens generated within each chunk until it exceeds the set generation length.
+- language_modeling_with_generation_ar_chunk.py
+    - Registers the 'language_modeling_with_generation_ar_chunk' task for training AR models on chunked wikitext data
+    - Instantiates the AddChunkStampDataset class designed for training AR models on chunked wikitext-103
+- language_modeling_with_generation_sar_chunk.py
+    - Registers the 'language_modeling_with_generation_sar_chunk' task for training SAR models on chunked wikitext data
+    - Instantiates the ChunkedDataset class designed for training SAR models on chunked wikitext-103
+- transformer_arch.py
+    - Registers 'transformer_sar_lm_ul'
+    - Registers 'transformer_sar_lm_debug'
