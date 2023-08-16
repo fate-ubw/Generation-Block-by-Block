@@ -25,6 +25,17 @@ A novel semi-autoregressive language model. The idea of generation chunk by chun
 | sar model | wikitext103 (parsing features ) | greedy | 0.017628779550712223 | 96608 | 0 | - | - |
 | sar model | wikitext103 (parsing features ) | nuelcus | 0.1766081592388548 | 96608 | 0.9 | - | - |
 
+## future work
+- I will keep tracking works related to "Block by Block generation"
+- Here are my interested fields and several models that I think have great potential:
+    - long dependency
+    - Segment, Block, Patch, Chunk
+        - [Block-State Transformer](https://arxiv.org/pdf/2306.09539.pdf)
+    - sparse attention, Linear attention
+    - recurrent model(how to use historical information)
+    - parallel decoding
+
+
 # Quick start experiment 2
 
 - enviroment
@@ -258,3 +269,4 @@ sh ./run/MLE_sar_chunk_chunkposition.sh
 - transformer_arch.py
     - Registers 'transformer_sar_lm_ul'
     - Registers 'transformer_sar_lm_debug'
+
