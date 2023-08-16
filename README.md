@@ -13,6 +13,9 @@ A novel semi-autoregressive language model. The idea of generation chunk by chun
 
 - parsing features text generation quality in mauve scores
 - generation chunk by chunk maybe not work using parsing features to segment text
+
+
+
 # Quick start experiment 2
 
 - enviroment
@@ -204,11 +207,11 @@ sh ./run/MLE_sar_chunk_chunkposition.sh
 ### fairseq/moduels
 
 - interchunk_learned_positional_embedding.py
-- Main function: This class mainly defines the learned positional embeddings between chunks
-- Define the InterchunkLearnedPositionalEmbedding class, which inherits from nn.Embedding. This class will be instantiated in transformer_sar.py
+    - Main function: This class mainly defines the learned positional embeddings between chunks
+    - Define the InterchunkLearnedPositionalEmbedding class, which inherits from nn.Embedding. This class will be instantiated in transformer_sar.py
 - insidechunk_learned_positional_embedding.py
-- Main function: Defines the positional embeddings within a chunk
-- Define the InsidechunkLearnedPositionalEmbedding class, which also inherits from nn.Embedding. This class will also be instantiated in transformer_sar.py
+    - Main function: Defines the positional embeddings within a chunk
+    - Define the InsidechunkLearnedPositionalEmbedding class, which also inherits from nn.Embedding. This class will also be instantiated in transformer_sar.py
 
 ### fairseq/data
 
