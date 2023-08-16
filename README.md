@@ -213,46 +213,45 @@ sh ./run/MLE_sar_chunk_chunkposition.sh
     
     ```
     
-
 ### fairseq/models
 
 - transformer_sar.py
     - main function：define sar decoder model
     - Define the `TransformerSarDecoder` class, which inherits from the `TransformerDecoder` class (in [transformer.py](http://transformer.py/)). The `TransformerSarDecoder` class will be instantiated in the transformer_lm_sar.py file, and implements the main architecture for the SAR model.
-    - Override the **init**() method, and initialize two types of positional embeddings
-    - Override the extract_features() method, rewrite the forward part of the model, replacing the mask matrix and position encoding for the AR model
+    - Override the **`init**()` method, and initialize two types of positional embeddings
+    - Override the `extract_features()` method, rewrite the forward part of the model, replacing the mask matrix and position encoding for the AR model
 - transformer_lm_sar.py
     - Main function: This file integrates the base classes and defines the SAR language model
-    - Define the TransformerSarLanguageModel class, which inherits from the TransformerLanguageModel class in transformer_lm.py
-    - Override the build_model() method, and define the TransformerSarDecoder in build_model()
-    - Register the transformer_sar_lm model
-    - Register the transformer_sar_lm_big model
+    - Define the `TransformerSarLanguageModel` class, which inherits from the TransformerLanguageModel class in `transformer_lm.py`
+    - Override the `build_model()` method, and define the `TransformerSarDecoder` in `build_model()`
+    - Register the `transformer_sar_lm` model
+    - Register the `transformer_sar_lm_big` model
 
 ### fairseq/moduels
 
 - interchunk_learned_positional_embedding.py
 - Main function: This class mainly defines the learned positional embeddings between chunks
-- Define the InterchunkLearnedPositionalEmbedding class, which inherits from nn.Embedding. This class will be instantiated in transformer_sar.py
+- Define the `InterchunkLearnedPositionalEmbedding` class, which inherits from `nn.Embedding`. This class will be instantiated in transformer_sar.py
 - insidechunk_learned_positional_embedding.py
 - Main function: Defines the positional embeddings within a chunk
-- Define the InsidechunkLearnedPositionalEmbedding class, which also inherits from nn.Embedding. This class will also be instantiated in transformer_sar.py
+- Define the `InsidechunkLearnedPositionalEmbedding` class, which also inherits from `nn.Embedding`. This class will also be instantiated in transformer_sar.py
 
 ### fairseq/data
 
 - add_chunkstamp_dataset.py
-    - Main function: The dataloader function written for training the AR model on the chunked wikitext dataset. The chunked wikitext-103 data processed by spacy only has <chunk_s> and <chunk_e> tags added to data belonging to chunks, non-chunk data does not have <chunk_s> and <chunk_e> tags. However, during training, the model also adds <chunk_s> and <chunk_e> tags to non-chunks, treating them as chunks as well.
-    - Define the AddChunkStampDataset class inheriting from MonolingualDataset. The AddChunkStampDataset class will be instantiated in language_modeling_with_generation_ar_chunk.py.
+    - Main function: The dataloader function written for training the AR model on the chunked wikitext dataset. The chunked wikitext-103 data processed by spacy only has `<chunk_s>` and `<chunk_e>` tags added to data belonging to chunks, non-chunk data does not have `<chunk_s>` and `<chunk_e>` tags. However, during training, the model also adds `<chunk_s>` and `<chunk_e>` tags to non-chunks, treating them as chunks as well.
+    - Define the `AddChunkStampDataset` class inheriting from `MonolingualDataset`. The `AddChunkStampDataset` class will be instantiated in language_modeling_with_generation_ar_chunk.py.
 - chunked_dataset.py
-    - Main function: The dataloader function written for training the SAR model on the chunked wikitext dataset. The chunked wikitext-103 data processed by spacy only has <chunk_s> and <chunk_e> tags added to data belonging to chunks, non-chunk data does not have <chunk_s> and <chunk_e> tags. However, during training, the SAR model also adds <chunk_s> and <chunk_e> tags to non-chunks, treating them as chunks as well.
+    - Main function: The dataloader function written for training the SAR model on the chunked wikitext dataset. The chunked wikitext-103 data processed by spacy only has `<chunk_s>` and `<chunk_e>` tags added to data belonging to chunks, non-chunk data does not have `<chunk_s>` and `<chunk_e>` tags. However, during training, the SAR model also adds `<chunk_s>` and `<chunk_e>` tags to non-chunks, treating them as chunks as well.
     - And this dataloader implements the functionality to truncate overly long chunks.
-    - Define the ChunkedDataset class, inheriting from MonolingualDataset. ChunkedDataset will be instantiated in language_modeling_with_generation_sar_chunk.py.
+    - Define the ChunkedDataset class, inheriting from `MonolingualDataset`. `ChunkedDataset` will be instantiated in language_modeling_with_generation_sar_chunk.py.
 
 ### fairseq/customs
 
 - evaluation_chunked_data.py
-    - Implements specialized evaluation for data with parsing features (<chunk_s> <chunk_e>). The current version removes all <chunk_s> <chunk_e> tags after generate_completions() generates tokens, so the generated data has no chunk features for normal Mauve scoring.
+    - Implements specialized evaluation for data with parsing features (<chunk_s> <chunk_e>). The current version removes all `<chunk_s> <chunk_e>` tags after `generate_completions()` generates tokens, so the generated data has no chunk features for normal Mauve scoring.
 - evaluate_utils_chunk_sar.py
-    - Define the generate_completions_sar function
+    - Define the `generate_completions_sar` function
     - Make prefix and aligned target data
     - Feed data into the sequence generator
 - evaluate_utils_chunk_ar.py
@@ -261,12 +260,11 @@ sh ./run/MLE_sar_chunk_chunkposition.sh
     - Problem: This function involves the main part of model inference. Since the number of valid tokens generated each time is unknown, the number of model inference steps is not fixed if we want to generate text of a specific length.
     - Solution: To solve the above problem, we can only use an accumulative approach - accumulate the number of valid tokens generated within each chunk until it exceeds the set generation length.
 - language_modeling_with_generation_ar_chunk.py
-    - Registers the 'language_modeling_with_generation_ar_chunk' task for training AR models on chunked wikitext data
-    - Instantiates the AddChunkStampDataset class designed for training AR models on chunked wikitext-103
+    - Registers the '`language_modeling_with_generation_ar_chunk`' task for training AR models on chunked wikitext data
+    - Instantiates the `AddChunkStampDataset` class designed for training AR models on chunked wikitext-103
 - language_modeling_with_generation_sar_chunk.py
-    - Registers the 'language_modeling_with_generation_sar_chunk' task for training SAR models on chunked wikitext data
-    - Instantiates the ChunkedDataset class designed for training SAR models on chunked wikitext-103
+    - Registers the '`language_modeling_with_generation_sar_chunk`' task for training SAR models on chunked wikitext data
+    - Instantiates the `ChunkedDataset` class designed for training SAR models on chunked wikitext-103
 - transformer_arch.py
-    - Registers 'transformer_sar_lm_ul'
-    - Registers 'transformer_sar_lm_debug'
-
+    - Registers '`transformer_sar_lm_ul`'
+    - Registers '`transformer_sar_lm_debug`'
