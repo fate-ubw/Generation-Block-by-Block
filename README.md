@@ -25,18 +25,27 @@ A novel semi-autoregressive language model. The idea of generation chunk by chun
 | sar model | wikitext103 (parsing features ) | greedy | 0.017628779550712223 | 96608 | 0 | - | - |
 | sar model | wikitext103 (parsing features ) | nuelcus | 0.1766081592388548 | 96608 | 0.9 | - | - |
 
-## future work
+## Future work
 - I will keep tracking works related to "Block by Block generation"
-- Here are my interested fields and several models that I think have great potential:
-    - long dependency
+- Here are my interested fields and several models that I think great potential:
     - Segment, Block, Patch, Chunk
+        - [MEGABYTE: Predicting Million-byte Sequences with Multiscale Transformers](https://arxiv.org/pdf/2305.07185.pdf)
+        - [Block-Recurrent Transformers](https://arxiv.org/pdf/2203.07852.pdf)
+        - [BP-Transformer: Modelling Long-Range Context via Binary Partitioning](https://arxiv.org/pdf/1911.04070.pdf)
         - [Block-State Transformer](https://arxiv.org/pdf/2306.09539.pdf)
+    - long dependency
+        - [Transformer-XL: Attentive Language Models Beyond a Fixed-Length Context](https://arxiv.org/pdf/1901.02860.pdf)
+        - [longformer](https://arxiv.org/pdf/2004.05150.pdf)
+        - [General-purpose, long-context autoregressive modeling with Perceiver AR](https://arxiv.org/pdf/2202.07765.pdf)
+    - Non-autoregressive & semi-autoregressive model
+    - parallel decoding for inference
     - sparse attention, Linear attention
     - recurrent model(how to use historical information)
-    - parallel decoding
+        - [Retentive Network: A Successor to Transformer for Large Language Models](https://arxiv.org/pdf/2307.08621.pdf)
 
 
-# Quick start experiment 2
+
+# Quick start by yourself
 
 - enviroment
 
@@ -120,16 +129,7 @@ root@pai-worker2-2080ti-41:/mnt/nfs-storage/scp/wikitext-103# tree
 - remember change path TEXT and HOME according to your environment
 
 ```python
-TEXT=/chunked_wikitext103
-HOME=/mnt/nfs-storage/jim/GennerationChunk_by_Chunk
-
-fairseq-preprocess \
-    --only-source \
-    --trainpref $TEXT/chunked_wiki.train.tokens \
-    --validpref $TEXT/chunked_wiki.valid.tokens \
-    --testpref $TEXT/chunked_wiki.test.tokens \
-    --destdir $HOME/data-bin \
-    --workers 20
+sh ./1-preprocess_data/fairseq_preprocess.sh
 ```
 
 ## train model
