@@ -21,7 +21,7 @@ A novel semi-autoregressive language model. The idea of generation chunk by chun
     | vanilla Transformer (Decoder Only) | wikitext103 | greedy | 0.29997179936793095 | baseline | 33609 | 0 | 0.39287125003563 | 25.7757158475847 |
     | vanilla Transformer (Decoder Only) | wikitext103 | nuelcus | 0.9342974452364826 | beseline | 33609 | 0.9 | 0.39287125003563 | 25.7757158475847 |
     | vanilla Transformer (Decoder Only) | wikitext103 (parsing features ) | greedy | 0.23278401293948345 | model 1 | 46207 | 0 | 0.3314446349618745 | 65.99023619926712 |
-    | vanilla Transformer (Decoder Only) | wikitext103 (parsing features ) | nuelcus | ⭐️0.9402372689796121 | model 1 | 46207 | 0.9 | 0.3314446349618745 | 65.99023619926712 |
+    | vanilla Transformer (Decoder Only) | wikitext103 (parsing features ) | nuelcus | 0.9402372689796121 | model 1 | 46207 | 0.9 | 0.3314446349618745 | 65.99023619926712 |
     | sar model | wikitext103 (parsing features ) | greedy | 0.017628779550712223 | model 2 | 96608 | 0 | - | - |
     | sar model | wikitext103 (parsing features ) | nuelcus | 0.1766081592388548 | model2 | 96608 | 0.9 | - | - |
 
