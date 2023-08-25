@@ -1,17 +1,17 @@
 # Generation chunk by chunk & semi autoregressive language model
 
-# idea
+# 💡idea
 
 A novel semi-autoregressive language model. The idea of generation chunk by chunk is inspired by the way of human speaking. Humans do not speak in complete sentences all in one times when using language. Instead, we express relatively complete chunks of meaning one at a time, with pauses in between each chunk. Mainstream language models like GPT generate one token at a time.However, Non-autoregressive and semi-autoregressive model achieve good performance in machine translation. semi-autoregressive model express potential in generation chunk by chunk. Here is my model and experiments results. 
 
-# Experiments
+# 📝Experiments
 
 1. Autoregressive model (decoder only Transformer) training on wikitext-103 with parsing features
     - Verify  parsing features can improve text generation quality
 2. Semi-autoregressive model (decoder only Transformer) training on wikitext-103 with parsing features
     - Verify if parsing features can be used for generation chunk by chunk
 
-# result & conclusion
+# 📌result & conclusion
 
 - parsing features improve text generation quality in mauve scores from **0.93 → 0.94 (nuelcus)**
 - generation chunk by chunk maybe not work using parsing features to segment text
@@ -21,11 +21,11 @@ A novel semi-autoregressive language model. The idea of generation chunk by chun
 | vanilla Transformer (Decoder Only) | wikitext103 | greedy | 0.29997179936793095 | baseline | 33609 | 0 | 0.39287125003563 | 25.7757158475847 |
 | vanilla Transformer (Decoder Only) | wikitext103 | nuelcus | 0.9342974452364826 | beseline | 33609 | 0.9 | 0.39287125003563 | 25.7757158475847 |
 | vanilla Transformer (Decoder Only) | wikitext103 (parsing features ) | greedy | 0.23278401293948345 | model 1 | 46207 | 0 | 0.3314446349618745 | 65.99023619926712 |
-| vanilla Transformer (Decoder Only) | wikitext103 (parsing features ) | nuelcus | 0.9402372689796121 | model 1 | 46207 | 0.9 | 0.3314446349618745 | 65.99023619926712 |
+| vanilla Transformer (Decoder Only) | wikitext103 (parsing features ) | nuelcus | ⭐️0.9402372689796121 | model 1 | 46207 | 0.9 | 0.3314446349618745 | 65.99023619926712 |
 | sar model | wikitext103 (parsing features ) | greedy | 0.017628779550712223 | model 2 | 96608 | 0 | - | - |
 | sar model | wikitext103 (parsing features ) | nuelcus | 0.1766081592388548 | model2 | 96608 | 0.9 | - | - |
 
-## Future work
+## 🔖Future work
 - I will keep tracking works related to "Block by Block generation"
 - Here are my interested fields and several models that I think great potential:
     - Segment, Block, Patch, Chunk
@@ -45,7 +45,7 @@ A novel semi-autoregressive language model. The idea of generation chunk by chun
 
 
 
-# Quick start by yourself
+# 🔨Quick start by yourself
 
 - enviroment
 
