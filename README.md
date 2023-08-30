@@ -1,4 +1,4 @@
-# Generation chunk by chunk & semi autoregressive language model
+# Generation Block by Block & semi autoregressive language model
 
 # 💡idea
 
