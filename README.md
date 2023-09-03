@@ -39,6 +39,9 @@ A novel semi-autoregressive language model. The idea of generation chunk by chun
         - [General-purpose, long-context autoregressive modeling with Perceiver AR](https://arxiv.org/pdf/2202.07765.pdf)
     - Non-autoregressive & semi-autoregressive model
     - parallel decoding for inference
+        - [Fast Inference from Transformers via Speculative Decoding](https://arxiv.org/abs/2211.17192)
+        - [SpecInfer: Accelerating Generative Large Language Model Serving with Speculative Inference and Token Tree Verification
+](https://arxiv.org/abs/2305.09781)   
     - sparse attention, Linear attention
     - recurrent model(how to use historical information)
         - [Retentive Network: A Successor to Transformer for Large Language Models](https://arxiv.org/pdf/2307.08621.pdf)
